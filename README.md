@@ -11,14 +11,14 @@ It is a toolbox for sessions: no launcher, boards or chips. You ask any
 session in plain words ("what's new on Telegram", "read my chat with Anna",
 "send Anna the report.pdf") and it answers through these **tools**:
 
-| Tool | What it does |
-|---|---|
-| `telegram_chats` | Recent chats, with their chat ids and unread counts |
-| `telegram_chat` | One chat as Markdown, newest page first; `from_message_id` pages back |
-| `telegram_new` | Messages others sent since the last call, per chat |
-| `telegram_media` | Saves one message's picture or file to disk and gives its path |
-| `telegram_send` | Sends a text, or a local file with an optional caption, to exactly one chat |
-| `telegram_link` | Signs in, signs out, says the status, forgets the api keys |
+| Tool             | What it does                                                                |
+| ---------------- | --------------------------------------------------------------------------- |
+| `telegram_chats` | Recent chats, with their chat ids and unread counts                         |
+| `telegram_chat`  | One chat as Markdown, newest page first; `from_message_id` pages back       |
+| `telegram_new`   | Messages others sent since the last call, per chat                          |
+| `telegram_media` | Saves one message's picture or file to disk and gives its path              |
+| `telegram_send`  | Sends a text, or a local file with an optional caption, to exactly one chat |
+| `telegram_link`  | Signs in, signs out, says the status, forgets the api keys                  |
 
 Reads run at once. They do not mark anything as read, so reading does not tell
 anyone you did. **Every send asks you first** on a confirm card over the
@@ -84,12 +84,12 @@ the api_id and api_hash, once signed out.
 
 ## Where things are kept
 
-| What | Where |
-|---|---|
-| api_id and api_hash | `api.secrets` (sealed by prifly), never on disk |
-| Login and TDLib's copy of your chats and messages | `data/db/` in the extension's folder, TDLib's own database (git-ignored) |
-| Downloaded files | `data/files/`; a copy for the session in its scratchpad (`telegram/<chat>/`), else `data/media/` |
-| Who is signed in, and where `telegram_new` stopped | `api.state` (moves with prifly's data) |
+| What                                               | Where                                                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| api_id and api_hash                                | `api.secrets` (sealed by prifly), never on disk                                                  |
+| Login and TDLib's copy of your chats and messages  | `data/db/` in the extension's folder, TDLib's own database (git-ignored)                         |
+| Downloaded files                                   | `data/files/`; a copy for the session in its scratchpad (`telegram/<chat>/`), else `data/media/` |
+| Who is signed in, and where `telegram_new` stopped | `api.state` (moves with prifly's data)                                                           |
 
 ## Needs
 
@@ -109,15 +109,15 @@ else takes a client factory, so the tests run against a fake TDLib client
 (`test/fake-td.ts`) and a fake `api` (`test/fake-api.ts`) and never load
 tdjson or touch the network.
 
-| File | What it is |
-|---|---|
-| `telegram.ts` | The link: keys, the lazy TDLib client, requests with a timeout, send outcomes |
-| `client.ts` | The only `tdl` import; the real client factory |
-| `signin.ts`, `link-tool.ts` | The sign-in loop over TDLib's authorization states; `telegram_link` and the status line |
-| `read.ts` | `telegram_chats`, `telegram_chat`, `telegram_new` |
-| `media.ts`, `send.ts` | `telegram_media`; `telegram_send` and its card |
-| `format.ts`, `errors.ts`, `types.ts` | Markdown for chats and messages; TDLib errors in words; our slice of TDLib's types |
-| `prompt.md` | What every session is told about the tools |
+| File                                 | What it is                                                                              |
+| ------------------------------------ | --------------------------------------------------------------------------------------- |
+| `telegram.ts`                        | The link: keys, the lazy TDLib client, requests with a timeout, send outcomes           |
+| `client.ts`                          | The only `tdl` import; the real client factory                                          |
+| `signin.ts`, `link-tool.ts`          | The sign-in loop over TDLib's authorization states; `telegram_link` and the status line |
+| `read.ts`                            | `telegram_chats`, `telegram_chat`, `telegram_new`                                       |
+| `media.ts`, `send.ts`                | `telegram_media`; `telegram_send` and its card                                          |
+| `format.ts`, `errors.ts`, `types.ts` | Markdown for chats and messages; TDLib errors in words; our slice of TDLib's types      |
+| `prompt.md`                          | What every session is told about the tools                                              |
 
 ## License
 
