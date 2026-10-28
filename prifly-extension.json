@@ -1,0 +1,8 @@
+{
+  "id": "telegram",
+  "name": "Telegram",
+  "description": "Your own Telegram account: sessions list and read your chats, see what is new, save media, and send messages and files that go out only when you confirm them on a card.",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "prompt": "prompt.md"
+}
