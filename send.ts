@@ -12,10 +12,15 @@
 import { statSync } from "node:fs";
 import { basename, extname } from "node:path";
 import type { ConfirmSpec, ExtensionTool } from "@prifly/extension-api";
+import type {
+  inputMessageDocument$Input,
+  inputMessagePhoto$Input,
+  inputMessageText$Input,
+} from "tdlib-types";
 import { explain } from "./errors";
 import { chatIdOf } from "./read";
 import type { SendOutcome, Telegram } from "./telegram";
-import type { TdChat, TdMessage, TdObject } from "./types";
+import type { TdChat, TdMessage } from "./types";
 
 /** What a tool returns when the reader cancels its confirm card. */
 export const CANCELLED = "Not done: you cancelled";
@@ -73,15 +78,22 @@ function card(send: Send, editable: boolean): ConfirmSpec & { content: string } 
   };
 }
 
-function inputContent(send: Send): TdObject {
-  const formatted = { _: "formattedText", text: send.message };
+/** The message content TDLib takes, typed against its own definitions: a file is nested in `inputPhoto` or `inputDocument`. */
+type InputContent = inputMessageText$Input | inputMessagePhoto$Input | inputMessageDocument$Input;
+
+function inputContent(send: Send): InputContent {
+  const formatted = { _: "formattedText", text: send.message } as const;
   const { file } = send;
   if (file === null) return { _: "inputMessageText", text: formatted };
-  const local = { _: "inputFileLocal", path: file.path };
+  const local = { _: "inputFileLocal", path: file.path } as const;
   if (PICTURES.includes(extname(file.path).toLowerCase())) {
-    return { _: "inputMessagePhoto", photo: local, caption: formatted };
+    return { _: "inputMessagePhoto", photo: { _: "inputPhoto", photo: local }, caption: formatted };
   }
-  return { _: "inputMessageDocument", document: local, caption: formatted };
+  return {
+    _: "inputMessageDocument",
+    document: { _: "inputDocument", document: local },
+    caption: formatted,
+  };
 }
 
 /** Everything a send is checked for before the reader is asked. */

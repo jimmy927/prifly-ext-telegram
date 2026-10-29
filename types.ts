@@ -62,6 +62,12 @@ export type TdContent = {
   video_note?: { video: TdFile };
   animation?: { file_name?: string; animation: TdFile };
   sticker?: { sticker: TdFile };
+  /** Service messages: who was added, the new title, the call. */
+  member_user_ids?: number[];
+  title?: string;
+  is_video?: boolean;
+  duration?: number;
+  discard_reason?: { _: string };
 };
 
 export type TdSender =

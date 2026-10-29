@@ -5,7 +5,7 @@
     "moduleResolution": "bundler",
     "moduleDetection": "force",
     "lib": ["ES2023"],
-    "types": ["bun"],
+    "types": ["bun", "@prebuilt-tdlib/types"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,

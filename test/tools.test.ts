@@ -231,14 +231,19 @@ test("a file goes with its caption as a document, a picture as a photo; the card
   expect(s.td.sent()[0]).toMatchObject({
     input_message_content: {
       _: "inputMessageDocument",
-      document: { _: "inputFileLocal", path: doc },
+      document: { _: "inputDocument", document: { _: "inputFileLocal", path: doc } },
       caption: { text: "the report" },
     },
   });
   const pic = join(s.td.folder, "x.png");
   writeFileSync(pic, "png");
   await s.call("telegram_send", { chat_id: 100, file: pic });
-  expect(s.td.sent()[1]).toMatchObject({ input_message_content: { _: "inputMessagePhoto" } });
+  expect(s.td.sent()[1]).toMatchObject({
+    input_message_content: {
+      _: "inputMessagePhoto",
+      photo: { _: "inputPhoto", photo: { _: "inputFileLocal", path: pic } },
+    },
+  });
   await expect(
     s.call("telegram_send", { chat_id: 100, file: join(s.td.folder, "missing.bin") }),
   ).rejects.toThrow("cannot read the file");
