@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from "bun:test";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { MOST_PER_HOUR } from "../send";
+import { type CardSpec, MOST_PER_HOUR } from "../send";
 import { type Setup, type SetupOptions, setup } from "./setup";
 
 let current: Setup | undefined;
@@ -248,6 +248,24 @@ test("a file goes with its caption as a document, a picture as a photo; the card
     s.call("telegram_send", { chat_id: 100, file: join(s.td.folder, "missing.bin") }),
   ).rejects.toThrow("cannot read the file");
   expect(existsSync(doc)).toBe(true);
+});
+
+test("a picture's card carries the picture, plain and editable; a document's card carries none", async () => {
+  for (const options of [{}, { edit: "same" }] as const) {
+    const s = await ready(options);
+    const pic = join(s.td.folder, "cat.JPG");
+    writeFileSync(pic, "jpegjpg");
+    const doc = join(s.td.folder, "report.pdf");
+    writeFileSync(doc, "pdf");
+    await s.call("telegram_send", { chat_id: 100, file: pic, text: "look" });
+    await s.call("telegram_send", { chat_id: 100, file: doc });
+    const [picture, document]: (CardSpec | undefined)[] =
+      "edit" in options ? s.edits : s.fake.confirms;
+    expect(picture?.images).toEqual([
+      { mimeType: "image/jpeg", bytes: new Uint8Array(readFileSync(pic)), name: "cat.JPG" },
+    ]);
+    expect(document !== undefined && "images" in document).toBe(false);
+  }
 });
 
 test("a send Telegram refuses is reported, and a flood wait is told in words", async () => {

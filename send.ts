@@ -9,7 +9,7 @@
  * does not reach.
  */
 
-import { statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { basename, extname } from "node:path";
 import type { ConfirmSpec, ExtensionTool } from "@prifly/extension-api";
 import type {
@@ -30,6 +30,18 @@ export const MOST_PER_HOUR = 30;
 /** Telegram's own limit for one file. */
 const MOST_FILE_BYTES = 2_000_000_000;
 const PICTURES = [".jpg", ".jpeg", ".png"];
+/** The largest picture prifly draws on a confirm card. */
+const MOST_CARD_IMAGE_BYTES = 10 * 1024 * 1024;
+
+/** A picture shown on a confirm card. */
+export type CardImage = { mimeType: string; bytes: Uint8Array; name?: string };
+
+/**
+ * A confirm card with `images` (drawn on the card), which the published
+ * `@prifly/extension-api` does not declare yet. A prifly that does not know
+ * the field ignores it.
+ */
+export type CardSpec = ConfirmSpec & { images?: CardImage[] };
 
 type Send = {
   chat: TdChat;
@@ -57,7 +69,7 @@ function fileToSend(path: string): NonNullable<Send["file"]> {
 }
 
 /** The confirm card; with `editable` the message or caption is the editable `content` alone. */
-function card(send: Send, editable: boolean): ConfirmSpec & { content: string } {
+function card(send: Send, editable: boolean): CardSpec & { content: string } {
   const to = `${send.chat.title} (chat id ${send.chat.id})`;
   const { file } = send;
   if (file === null) {
@@ -75,7 +87,16 @@ function card(send: Send, editable: boolean): ConfirmSpec & { content: string } 
     summary: `Send the file ${file.name} to ${send.chat.title}${send.message === "" ? "" : " with a caption"}.`,
     content: editable ? send.message : `To: ${to}\nFile: ${file.name}${caption}`,
     details,
+    ...imagesOf(file),
   };
+}
+
+/** A picture the file goes out as, for the card's `images`; nothing for any other file. */
+function imagesOf(file: NonNullable<Send["file"]>): Pick<CardSpec, "images"> {
+  const extension = extname(file.path).toLowerCase();
+  if (!PICTURES.includes(extension) || file.bytes > MOST_CARD_IMAGE_BYTES) return {};
+  const mimeType = extension === ".png" ? "image/png" : "image/jpeg";
+  return { images: [{ mimeType, bytes: readFileSync(file.path), name: file.name }] };
 }
 
 /** The message content TDLib takes, typed against its own definitions: a file is nested in `inputPhoto` or `inputDocument`. */
